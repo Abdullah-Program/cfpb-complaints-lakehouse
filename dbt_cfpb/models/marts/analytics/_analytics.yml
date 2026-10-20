@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: mart_complaints_by_company_month
+    description: Complaints, response quality and rank per company per month.
+    columns:
+      - name: company_name_clean
+        data_tests: [not_null]
+      - name: month
+        data_tests: [not_null]
+      - name: complaints
+        data_tests: [not_null]
+      - name: timely_rate
+        data_tests: [rate_between_0_and_1]
+      - name: relief_rate
+        data_tests: [rate_between_0_and_1]
+      - name: dispute_rate
+        data_tests: [rate_between_0_and_1]
+
+  - name: mart_resolution_performance
+    description: Resolution speed (avg / p50 / p90) and outcome mix per product group and year.
+    columns:
+      - name: product_group
+        data_tests: [not_null]
+      - name: timely_rate
+        data_tests: [rate_between_0_and_1]
+      - name: relief_rate
+        data_tests: [rate_between_0_and_1]
+
+  - name: mart_product_issue_trends
+    description: Monthly complaint counts by product and issue with MoM change and rolling average.
+    columns:
+      - name: month
+        data_tests: [not_null]
+      - name: complaints
+        data_tests: [not_null]
+
+  - name: mart_geo_complaints
+    description: Complaints by state and month with share of month and rank.
+    columns:
+      - name: state_code
+        data_tests: [not_null]
+      - name: share_of_month
+        data_tests: [rate_between_0_and_1]
+
+  - name: mart_data_quality_scorecard
+    description: Monthly data-quality rates derived from Spark dq_flags.
+    columns:
+      - name: month
+        data_tests: [unique, not_null]
+      - name: pct_state_invalid
+        data_tests: [rate_between_0_and_1]
+      - name: pct_zip_masked
+        data_tests: [rate_between_0_and_1]
+
+exposures:
+  - name: complaints_dashboard
+    type: dashboard
+    maturity: medium
+    description: Metabase / Superset dashboard on top of the analytics marts.
+    owner:
+      name: Abdullah
+    depends_on:
+      - ref('mart_complaints_by_company_month')
+      - ref('mart_resolution_performance')
+      - ref('mart_product_issue_trends')
+      - ref('mart_geo_complaints')
+      - ref('mart_data_quality_scorecard')

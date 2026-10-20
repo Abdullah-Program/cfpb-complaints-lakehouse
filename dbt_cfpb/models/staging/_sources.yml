@@ -1,0 +1,26 @@
+version: 2
+
+sources:
+  - name: silver
+    description: >
+      Cleaned, deduplicated complaint data written by the Spark pipeline
+      (data/silver). dbt never mutates it; it only models on top of it.
+    database: "{{ env_var('SNOWFLAKE_DATABASE', 'CFPB') }}"
+    schema: "{{ env_var('SNOWFLAKE_SILVER_SCHEMA', 'SILVER') }}"
+    tables:
+      - name: complaints
+        description: One row per complaint_id (latest version wins).
+        config:
+          loaded_at_field: silver_updated_at
+          freshness:
+            warn_after: {count: 3, period: day}
+        meta:
+          external_location: >-
+            read_parquet('{{ env_var("SILVER_PATH", "../data/silver/complaints") }}/**/*.parquet', hive_partitioning = true,
+            hive_types_autocast = false)
+      - name: company_map
+        description: >
+          Audit trail of company entity resolution (raw normalised key ->
+          canonical company) and how each mapping was decided.
+        meta:
+          external_location: "read_parquet('{{ env_var(\"COMPANY_MAP_PATH\", \"../data/silver/company_map\") }}/*.parquet')"

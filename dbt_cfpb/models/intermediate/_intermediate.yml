@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: int_complaints_enriched
+    description: Staging joined with state, product and company reference seeds plus derived columns.
+    columns:
+      - name: complaint_id
+        data_tests:
+          - unique
+          - not_null
+      - name: region
+        data_tests:
+          - not_null
+      - name: product_group
+        data_tests:
+          - not_null

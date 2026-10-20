@@ -1,0 +1,15 @@
+pyspark>=4.0
+pandas
+pyarrow
+numpy
+duckdb
+dbt-core
+dbt-duckdb
+rapidfuzz
+requests
+huggingface_hub
+pyyaml
+pytest
+ruff
+streamlit
+plotly

@@ -1,0 +1,28 @@
+# Two ways to run the project without installing anything locally.
+#   docker compose up --build pipeline      one-shot end-to-end demo on synthetic data
+#   docker compose up airflow               Airflow UI on http://localhost:8080 (admin / admin)
+#
+# NOTE: written for local development; not load-tested. Pin image tags for anything serious.
+services:
+  pipeline:
+    build: .
+    volumes:
+      - ./data:/app/data
+    command: make demo
+
+  airflow:
+    image: apache/airflow:2.10.5-python3.12
+    user: root
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      PROJECT_ROOT: /opt/airflow/project
+      LAKE_ROOT: /opt/airflow/project/data
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/opt/airflow/project
+      - ./airflow/dags:/opt/airflow/dags
+    command: >
+      bash -c "apt-get update -qq && apt-get install -y -qq openjdk-17-jre-headless >/dev/null
+      && pip install -q -r /opt/airflow/project/requirements.txt
+      && airflow standalone"

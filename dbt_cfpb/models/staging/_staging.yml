@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: stg_complaints
+    description: Silver complaints, renamed and cast. One row per complaint_id.
+    columns:
+      - name: complaint_id
+        description: CFPB complaint identifier.
+        data_tests:
+          - unique
+          - not_null
+      - name: date_received
+        description: Date the CFPB received the complaint.
+        data_tests:
+          - not_null
+          - date_not_in_future
+          - date_not_before:
+              arguments:
+                min_date: "2011-07-21"
+      - name: state_code
+        description: Valid 2-letter state/territory code, NULL if missing or invalid.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('state_codes')
+                field: state_code
+              config:
+                where: "state_code is not null"
+      - name: consumer_consent_provided
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["provided", "not_provided", "withdrawn", "other", "unknown"]
+      - name: submitted_via
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["Web", "Phone", "Referral", "Postal mail", "Email", "Fax", "Other"]
+              config:
+                where: "submitted_via is not null"
+      - name: company_response_to_consumer
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - Closed with explanation
+                  - Closed with monetary relief
+                  - Closed with non-monetary relief
+                  - Closed without relief
+                  - Closed with relief
+                  - Closed
+                  - In progress
+                  - Untimely response
+              config:
+                where: "company_response_to_consumer is not null"
+      - name: company_key
+        description: Normalised company key (upper-case, no punctuation or legal suffix).
+
+  - name: stg_company_map
+    description: Entity-resolution audit trail from Spark.
+    columns:
+      - name: company_key
+        data_tests:
+          - unique
+          - not_null
+      - name: resolution_method
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["rule", "exact", "fuzzy", "new"]

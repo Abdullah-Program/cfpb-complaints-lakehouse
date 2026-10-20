@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# generated data and dbt artefacts
+data/
+!data/.gitkeep
+dbt_cfpb/target/
+dbt_cfpb/logs/
+dbt_cfpb/dbt_packages/
+*.duckdb
+*.duckdb.wal
+
+# local config
+.env
+.vscode/
+logs/
+spark-warehouse/
+metastore_db/
+derby.log
